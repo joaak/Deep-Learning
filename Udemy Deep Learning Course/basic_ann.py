@@ -38,7 +38,6 @@ sc = StandardScaler()
 X_train = sc.fit_transform(X_train)
 X_test = sc.transform(X_test)
 
-
 # Part 2 - Making the ANN
 
 # Importing the Keras libraries and packages
@@ -96,3 +95,26 @@ new_prediction = classifier.predict(sc.transform(np.array([[0.0, 0, 600, 1, 40, 
 new_prediction = (new_prediction > 0.5)
 
 # new_prediction = False
+
+# Evaluating
+from keras.wrappers.scikit_learn import KerasClassifier 
+from sklearn.model_selection import cross_val_score
+
+def build_classifier():
+    classifier = Sequential()
+    classifier.add(Dense(units = 6, kernel_initializer = 'uniform', activation = 'relu', input_dim = 11)) # input_dim only needed for first hidden layer
+    classifier.add(Dense(units = 6, kernel_initializer = 'uniform', activation = 'relu'))
+    classifier.add(Dense(units = 1, kernel_initializer = 'uniform', activation = 'sigmoid'))
+    classifier.compile(optimizer = 'adam', loss = 'binary_crossentropy', metrics = ['accuracy'])
+    return classifier
+
+classifier = KerasClassifier(build_fn = build_classifier, batch_size = 10, epochs = 100)
+accuracies = cross_val_score(estimator = classifier, X = X_train, y = y_train, cv = 10, n_jobs = -1)
+
+mean = accuracies.mean()
+variance = accuracies.std()
+
+# Mean = 0.838624994531
+# Variance = 0.014463854715
+
+# Hence, Low Bias and Low Variance 
